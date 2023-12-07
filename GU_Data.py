@@ -6,8 +6,7 @@ import tkinter as tk
 from tkinter import ttk
 from scipy import stats
 import pandas as pd
-from tkinter import PhotoImage, Label
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkinter import Label
 
 
 def read_file(folder_path):
@@ -46,7 +45,7 @@ def sort_data(ls1, ls2):
 
 
 class comm:
-    def __init__(self, crosshead, load, time, test_type, height, area, name, dirc):
+    def __init__(self, ftpr, current_path, t_ftpr, test_id, total_n, all_test_name):
         """
         initial the class
 
@@ -57,27 +56,146 @@ class comm:
         **Returns**
            None
         """
-        self.crosshead = crosshead
-        self.load = load
-        self.time = time
-        self.test_type = test_type
-        self.height = height
-        self.area = area
-        self.name = name
-        self.dirc = dirc
-    
-def plot_fig(ftpr):
-    global current_path
-    current_path = ftpr
-    path = os.path.join(ftpr,all_test_name[test_id] + ".png")
-    update_left_frame()
-    img = Image.open(path)
-    img_tk = ImageTk.PhotoImage(img)
-    label = Label(left_frame, image=img_tk)
-    label.image = img_tk  # Keep a reference!
-    label.pack()
+        self.ftpr = ftpr
+        self.t_ftpr = t_ftpr
+        self.current_path = current_path
+        self.test_id = test_id
+        self.total_n = total_n
+        self.all_test_name = all_test_name
 
+    def plot_fig(self):
+        path = os.path.join(self.ftpr,self.all_test_name[self.test_id] + ".png")
+        self.update_left_frame()
+        img = Image.open(path)
+        img_tk = ImageTk.PhotoImage(img)
+        label = Label(left_frame, image=img_tk)
+        label.image = img_tk  # Keep a reference!
+        label.pack()
 
+    def increase_test_id(self):
+        self.test_id += 1
+        if self.test_id > self.total_n - 1:
+            self.test_id = 0
+        self.update_left_frame()
+        self.plot_fig()
+
+    def decrease_test_id(self):
+        self.test_id -= 1
+        if self.test_id < 0:
+            self.test_id = self.total_n - 1
+        self.update_left_frame()
+        self.plot_fig()
+
+    def update_left_frame(self):
+        for widget in left_frame.winfo_children():
+            widget.destroy()
+
+    def go_path(self, path):
+        self.ftpr = path
+        self.plot_fig()
+    def update_left_top_frame(self):
+        t_ftpr =self.t_ftpr
+        for widget in left_top_frame.winfo_children():
+            widget.destroy()
+        button_width = 15
+        folder_path1 = os.path.join(t_ftpr, "Figure", "crosshead VS load")
+        folder_path2 = os.path.join(t_ftpr, "Figure", "time VS load")
+        folder_path3 = os.path.join(t_ftpr, "Figure", "time VS crosshead")
+        self.ftpr = folder_path1
+        button1 = tk.Button(left_top_frame, text="Crosshead VS Load", command=lambda: self.go_path(folder_path1),
+                            width=button_width)
+
+        button2 = tk.Button(left_top_frame, text="Time VS Load", command=lambda: self.go_path(folder_path2),
+                            width=button_width)
+
+        button3 = tk.Button(left_top_frame, text="Time VS Crosshead", command=lambda: self.go_path(folder_path3),
+                            width=button_width)
+
+        prev_button = tk.Button(left_top_frame, text="Previous", command=lambda: self.decrease_test_id(), width=button_width)
+
+        next_button = tk.Button(left_top_frame, text="Next", command=lambda: self.increase_test_id(), width=button_width)
+
+        button1.grid(row=0, column=2, pady=(3, 30))
+        button2.grid(row=0, column=3, pady=(3, 30))
+        button3.grid(row=0, column=4, pady=(3, 30))
+        prev_button.grid(row=2, column=0)
+        next_button.grid(row=2, column=6)
+
+    def update_right_frame1(self):
+        global sc_df
+        for widget in right_frame1.winfo_children():
+            widget.destroy()
+        columns = list(sc_df.columns)
+        frame_width = right_frame1.winfo_width()
+        col_width = frame_width // len(columns)
+
+        self.tree1 = ttk.Treeview(right_frame1, columns=columns, show="headings")
+        for col in columns:
+            self.tree1.heading(col, text=col)
+            self.tree1.column(col, width=col_width, anchor='center')
+        for index, row in sc_df.iterrows():
+            self.tree1.insert("", "end", values=list(row))
+
+        self.tree1.bind("<Double-1>", self.on_row_double_click1)
+
+        scrollbar = ttk.Scrollbar(right_frame1, orient="vertical", command=self.tree1.yview)
+        self.tree1.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
+        scrollbar = ttk.Scrollbar(right_frame1, orient="horizontal", command=self.tree1.xview)
+        self.tree1.configure(xscrollcommand=scrollbar.set)
+        scrollbar.pack(side="bottom", fill="x")
+        self.tree1.pack(fill="both", expand=True)
+
+    def update_right_frame2(self):
+        global dc_df
+        for widget in right_frame2.winfo_children():
+            widget.destroy()
+        columns = list(dc_df.columns)
+        frame_width = right_frame2.winfo_width()
+        col_width = frame_width // len(columns)
+
+        self.tree = ttk.Treeview(right_frame2, columns=columns, show="headings")
+        for col in columns:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=col_width, anchor='center')
+        for index, row in dc_df.iterrows():
+            self.tree.insert("", "end", values=list(row))
+
+        self.tree.bind("<Double-1>", self.on_row_double_click)
+
+        scrollbar = ttk.Scrollbar(right_frame2, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
+        scrollbar = ttk.Scrollbar(right_frame2, orient="horizontal", command=self.tree.xview)
+        self.tree.configure(xscrollcommand=scrollbar.set)
+        scrollbar.pack(side="bottom", fill="x")
+        self.tree.pack(fill="both", expand=True)
+
+    def on_row_double_click(self, event):
+        selected_items = self.tree.selection()
+        if not selected_items:
+            return  # Exit the method if no item is selected
+
+        item = selected_items[0]  # Get selected item
+        test_name = self.tree.item(item, 'values')[0]  # Extract the name or identifier of the test
+        self.test_id = self.all_test_name.index(test_name)
+
+        # Update the left frame with this figure
+        self.plot_fig()
+
+    def on_row_double_click1(self, event):
+        selected_items = self.tree1.selection()
+        if not selected_items:
+            return  # Exit the method if no item is selected
+
+        item = selected_items[0]  # Get selected item
+        test_name = self.tree1.item(item, 'values')[0]  # Extract the name or identifier of the test
+
+        # Construct the path for the corresponding figure
+        self.test_id = self.all_test_name.index(test_name)
+
+        # Update the left frame with this figure
+        self.plot_fig()
 
 class Data:
     def __init__(self, crosshead, load, time, test_type, height, area, name, dirc):
@@ -199,129 +317,13 @@ class Data:
         slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
         return fit_start, fit_end, slope, intercept, half_time
 
-def increase_test_id():
-    global test_id, total_n
-    test_id += 1
-    if test_id > total_n - 1:
-        test_id = 0
-    update_left_frame()
-    plot_fig(current_path)
-
-def decrease_test_id():
-    global test_id, total_n
-    test_id -= 1
-    if test_id < 0:
-        test_id = total_n - 1
-    update_left_frame()
-    plot_fig(current_path)
-
-def update_left_frame():
-    for widget in left_frame.winfo_children():
-        widget.destroy()
-def update_left_top_frame(t_ftpr):
-    for widget in left_top_frame.winfo_children():
-        widget.destroy()
-    button_width = 15
-    folder_path1 = os.path.join(t_ftpr, "Figure", "crosshead VS load")
-    folder_path2 = os.path.join(t_ftpr, "Figure", "time VS load")
-    folder_path3 = os.path.join(t_ftpr, "Figure", "time VS crosshead")
-    button1 = tk.Button(left_top_frame, text="Crosshead VS Load", command=lambda: plot_fig(folder_path1), width=button_width)
-
-    button2 = tk.Button(left_top_frame, text="Time VS Load", command=lambda: plot_fig(folder_path2), width=button_width)
-
-    button3 = tk.Button(left_top_frame, text="Time VS Crosshead", command=lambda: plot_fig(folder_path3), width=button_width)
-
-    prev_button = tk.Button(left_top_frame, text="Previous", command=lambda: decrease_test_id(), width=button_width)
-
-    next_button = tk.Button(left_top_frame, text="Next", command=lambda: increase_test_id(), width=button_width)
-
-
-    button1.grid(row=0, column=2, pady=(3, 30))
-    button2.grid(row=0, column=3, pady=(3, 30))
-    button3.grid(row=0, column=4, pady=(3, 30))
-    prev_button.grid(row=2, column=0)
-    next_button.grid(row=2, column=6)
-
-def update_right_frame1(sc_df):
-    global table
-    for widget in right_frame1.winfo_children():
-        widget.destroy()
-    columns = list(sc_df.columns)
-    frame_width = right_frame1.winfo_width()
-    col_width = frame_width // 3
-
-    table = ttk.Treeview(right_frame1, columns=columns, show="headings")
-
-    # Define headings based on DataFrame columns
-    for col in columns:
-        table.heading(col, text=col)
-        table.column(col, width=col_width, anchor='center')
-    for index, row in sc_df.iterrows():
-        table.insert("", "end", values=list(row))
-    table.bind("<ButtonRelease-1>", on_row_click)
-
-    scrollbar = ttk.Scrollbar(right_frame1, orient="vertical", command=table.yview)
-    table.configure(yscroll=scrollbar.set)
-    scrollbar.pack(side="right", fill="y")
-    scrollbar = ttk.Scrollbar(right_frame1, orient="horizontal", command=table.xview)
-    table.configure(yscroll=scrollbar.set)
-    scrollbar.pack(side="bottom", fill="x")
-    # Pack the table last so it fills the remaining space
-    table.pack(fill="both", expand=True)
-
-    style = ttk.Style()
-    style.configure("Treeview",
-                    background="silver",
-                    foreground="black",
-                    rowheight=25,
-                    fieldbackground="light grey")
-
-    style.map('Treeview',
-              background=[('selected', 'green')])
-
-def update_right_frame2(dc_df):
-    frame_width = right_frame2.winfo_width()
-    col_width = frame_width // 2
-    for widget in right_frame2.winfo_children():
-        widget.destroy()
-
-    columns = list(dc_df.columns)
-    # Create the treeview
-    table = ttk.Treeview(right_frame2, columns=columns, show="headings")
-
-    # Define headings based on DataFrame columns
-    for col in columns:
-        table.heading(col, text=col)
-        table.column(col, width=col_width, anchor='center')
-
-    for index, row in dc_df.iterrows():
-        table.insert("", "end", values=list(row))
-
-    scrollbar = ttk.Scrollbar(right_frame2, orient="vertical", command=table.yview)
-    table.configure(yscroll=scrollbar.set)
-    scrollbar.pack(side="right", fill="y")
-
-    scrollbar = ttk.Scrollbar(right_frame2, orient="horizontal", command=table.xview)
-    table.configure(yscroll=scrollbar.set)
-    scrollbar.pack(side="bottom", fill="x")
-
-    table.pack(fill="both", expand=True)
-    style = ttk.Style()
-    style.configure("Treeview",
-                    background="silver",
-                    foreground="black",
-                    rowheight=25,
-                    fieldbackground="light grey")
-    style.map('Treeview',
-              background=[('selected', 'green')])
-
-def export_to_excel():
+def export_to_excel(self):
+    global  sc_df, dc_df
     with pd.ExcelWriter('output.xlsx', engine='openpyxl') as writer:
         sc_df.to_excel(writer, sheet_name='SC Data')
         dc_df.to_excel(writer, sheet_name='DC Data')
-
 def save_values():
-    global sc_df, dc_df, test_id, total_n, all_test_name
+    global sc_df, dc_df
     test_id = 0
     total_n = 0
     t_ftpr = entry1.get()
@@ -334,10 +336,14 @@ def save_values():
     dc_name = []
     sc_name = []
     all_test_name = []
+    current_path = []
+    ftpr = []
+    contr = comm(ftpr, current_path, t_ftpr, test_id, total_n, all_test_name)
     for filename in os.listdir(t_ftpr):
         if filename != "Figure":
             total_n += 1
             ftpr = os.path.join(t_ftpr, filename)
+            contr.ftpr = ftpr
             if ftpr[len(ftpr) - 1] == 'c' and ftpr[len(ftpr) - 2] == 'd':
                 test_type = 'dc'
             else:
@@ -358,9 +364,9 @@ def save_values():
                 sc_name.append(filename)
             all_test_name.append(filename)
     sc_data = {
-        "Test_Name" : sc_name,
-        "Modulus" : modulus,
-        "Half_time" : half_time
+        "Test_Name": sc_name,
+        "Modulus": modulus,
+        "Half_time": half_time
     }
     sc_df = pd.DataFrame(sc_data)
     dc_data = {
@@ -368,9 +374,18 @@ def save_values():
         "Plasticity": plasticity
     }
     dc_df = pd.DataFrame(dc_data)
-    update_left_top_frame(t_ftpr)
-    update_right_frame1(sc_df)
-    update_right_frame2(dc_df)
+
+    contr.update_left_top_frame()
+    contr.update_right_frame1()
+    contr.update_right_frame2()
+
+    contr.total_n = total_n
+    contr.all_test_name = all_test_name
+
+
+
+
+
 
 
 root = tk.Tk()
