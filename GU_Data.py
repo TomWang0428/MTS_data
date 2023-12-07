@@ -10,6 +10,21 @@ from tkinter import Label
 
 
 def read_file(folder_path):
+    """
+        read in the datas based on the folder path
+
+        **Parameters**
+            folder_path: *string*
+                The folder_path to read from
+
+        **Returns**
+           crosshead: *list*
+                The crosshead data converted from strings to floats
+           load: *list*
+                The load data converted from strings to floats
+           time: *list*
+                The time data converted from strings to floats
+    """
     crosshead = []
     load = []
     time = []
@@ -21,7 +36,7 @@ def read_file(folder_path):
             read_flag = 0
             with open(file_path, 'r') as f:
                 for line in f:
-                    if read_flag ==1:
+                    if read_flag == 1:
                         line = line.strip()
                         parts = line.split('\t')
                         crosshead.append(parts[0])
@@ -32,7 +47,23 @@ def read_file(folder_path):
                         read_flag = 1
     return [float(i) for i in crosshead], [float(i) for i in load], [float(i) for i in time]
 
+
 def sort_data(ls1, ls2):
+    """
+        Sort data based on ls1 and change ls2 accordingly
+
+        **Parameters**
+            ls1: *list*
+                The list to sort in ascending order
+            ls2: *list*
+                The list to sort base on order of ls1
+
+        **Returns**
+           sorted_list1: *list*
+                The sorted ls1
+           sorted_list2: *list*
+                The sorted ls2
+    """
     combined = sorted(zip(ls1, ls2))
 
     # Unzip the sorted pairs
@@ -45,16 +76,30 @@ def sort_data(ls1, ls2):
 
 
 class comm:
+    """
+        The class that includes most of commands for the GUI
+    """
+
     def __init__(self, ftpr, current_path, t_ftpr, test_id, total_n, all_test_name):
         """
-        initial the class
+            initial the class
 
-        **Parameters**
-            grid_data: *list*
-                list of the grid
+            **Parameters**
+                ftpr: *string*
+                    The directory of the folder
+                current_path: *string*
+                    The current figure plotted
+                t_ftpr: *string*
+                    The directory for the current figure plotted
+                test_id: *int*
+                    The id number for the current figure plotted
+                total_n: *int*
+                    The total number of figures
+                all_test_name: *list*
+                    List of all test names
 
-        **Returns**
-           None
+            **Returns**
+               None
         """
         self.ftpr = ftpr
         self.t_ftpr = t_ftpr
@@ -64,7 +109,16 @@ class comm:
         self.all_test_name = all_test_name
 
     def plot_fig(self):
-        path = os.path.join(self.ftpr,self.all_test_name[self.test_id] + ".png")
+        """
+            Open figure based on the current test_id
+
+            **Parameters**
+                None
+
+            **Returns**
+               None
+        """
+        path = os.path.join(self.ftpr, self.all_test_name[self.test_id] + ".png")
         self.update_left_frame()
         img = Image.open(path)
         img_tk = ImageTk.PhotoImage(img)
@@ -73,6 +127,15 @@ class comm:
         label.pack()
 
     def increase_test_id(self):
+        """
+            increase the test id by one when next bottom is pressed
+
+            **Parameters**
+                None
+
+            **Returns**
+               None
+        """
         self.test_id += 1
         if self.test_id > self.total_n - 1:
             self.test_id = 0
@@ -80,6 +143,15 @@ class comm:
         self.plot_fig()
 
     def decrease_test_id(self):
+        """
+            decrease the test id by one when next bottom is pressed
+
+            **Parameters**
+                None
+
+            **Returns**
+               None
+        """
         self.test_id -= 1
         if self.test_id < 0:
             self.test_id = self.total_n - 1
@@ -87,14 +159,42 @@ class comm:
         self.plot_fig()
 
     def update_left_frame(self):
+        """
+            Update the upper_left_frame by empty it
+
+            **Parameters**
+                None
+
+            **Returns**
+               None
+        """
         for widget in left_frame.winfo_children():
             widget.destroy()
 
     def go_path(self, path):
+        """
+            change the syntext of the path when the first figure is plotted
+
+            **Parameters**
+                None
+
+            **Returns**
+               None
+        """
         self.ftpr = path
         self.plot_fig()
+
     def update_left_top_frame(self):
-        t_ftpr =self.t_ftpr
+        """
+            Update the upper_left_top_frame by adding bottoms
+
+            **Parameters**
+                None
+
+            **Returns**
+               None
+        """
+        t_ftpr = self.t_ftpr
         for widget in left_top_frame.winfo_children():
             widget.destroy()
         button_width = 15
@@ -111,9 +211,11 @@ class comm:
         button3 = tk.Button(left_top_frame, text="Time VS Crosshead", command=lambda: self.go_path(folder_path3),
                             width=button_width)
 
-        prev_button = tk.Button(left_top_frame, text="Previous", command=lambda: self.decrease_test_id(), width=button_width)
+        prev_button = tk.Button(left_top_frame, text="Previous", command=lambda: self.decrease_test_id(),
+                                width=button_width)
 
-        next_button = tk.Button(left_top_frame, text="Next", command=lambda: self.increase_test_id(), width=button_width)
+        next_button = tk.Button(left_top_frame, text="Next", command=lambda: self.increase_test_id(),
+                                width=button_width)
 
         button1.grid(row=0, column=2, pady=(3, 30))
         button2.grid(row=0, column=3, pady=(3, 30))
@@ -122,6 +224,15 @@ class comm:
         next_button.grid(row=2, column=6)
 
     def update_right_frame1(self):
+        """
+            Update the right_frame1 by single compression table
+
+            **Parameters**
+                None
+
+            **Returns**
+               None
+        """
         global sc_df
         for widget in right_frame1.winfo_children():
             widget.destroy()
@@ -147,6 +258,15 @@ class comm:
         self.tree1.pack(fill="both", expand=True)
 
     def update_right_frame2(self):
+        """
+            Update the right_frame2 by double compression table
+
+            **Parameters**
+                None
+
+            **Returns**
+               None
+        """
         global dc_df
         for widget in right_frame2.winfo_children():
             widget.destroy()
@@ -172,6 +292,15 @@ class comm:
         self.tree.pack(fill="both", expand=True)
 
     def on_row_double_click(self, event):
+        """
+            Double click command to jump to the figure based on the table information clicked for dc_df
+
+            **Parameters**
+                None
+
+            **Returns**
+               None
+        """
         selected_items = self.tree.selection()
         if not selected_items:
             return  # Exit the method if no item is selected
@@ -184,6 +313,15 @@ class comm:
         self.plot_fig()
 
     def on_row_double_click1(self, event):
+        """
+            Double click command to jump to the figure based on the table information clicked for dc_df
+
+            **Parameters**
+                None
+
+            **Returns**
+               None
+        """
         selected_items = self.tree1.selection()
         if not selected_items:
             return  # Exit the method if no item is selected
@@ -197,14 +335,33 @@ class comm:
         # Update the left frame with this figure
         self.plot_fig()
 
+
 class Data:
+    """
+        The class for test datas and data processing
+    """
+
     def __init__(self, crosshead, load, time, test_type, height, area, name, dirc):
         """
         initial the class
 
         **Parameters**
-            grid_data: *list*
-                list of the grid
+            crosshead: *list*
+                list of the crosshead data
+            load: *list*
+                list of the load data
+            time: *list*
+                list of the time data
+            test_type: *string*
+                The test type (single compression or double compression)
+            height: *int*
+                The height of the sample
+            area: *int*
+                The area of the sample
+            name: *string*
+                The test name
+            dirc: *string*
+                The directory of the test
 
         **Returns**
            None
@@ -219,6 +376,21 @@ class Data:
         self.dirc = dirc
 
     def crosshead_load_graph(self):
+        """
+            To plot the crosshead VS load graph and find young's modulus and halftime if single compression, plasticity
+            if double compression
+
+            **Parameters**
+                None
+
+            **Returns**
+            plasticity: *float*
+                The plasticity of the sample
+            modulus: *float*
+                The young's modulus of the sample
+            half_time: *float*
+                The half_time for the sample
+        """
         x = self.crosshead
         y = self.load
         fig, ax = plt.subplots()
@@ -241,7 +413,7 @@ class Data:
             return plasticity
         if self.test_type == 'sc':
             fit_start, fit_end, slop, intercept, half_time = self.single_comp()
-            x_fit = [i for i in x if i >= x[fit_start] and i <=x[fit_end]]
+            x_fit = [i for i in x if i >= x[fit_start] and i <= x[fit_end]]
             y_fit = [a * slop + intercept for a in x_fit]
             ax.plot(x_fit, y_fit, 'r', markersize=5)
             fig.savefig(os.path.join(folder_path, self.name + ".png"))
@@ -250,6 +422,15 @@ class Data:
             return modulus, half_time
 
     def time_load_graph(self):
+        """
+            To plot the time VS load graph
+
+            **Parameters**
+                None
+
+            **Returns**
+                None
+        """
         x = self.time
         y = self.load
         fig, ax = plt.subplots()
@@ -259,14 +440,20 @@ class Data:
         plt.xlabel("Time(s)")
         plt.ylabel("Load(N)")
         folder_path = os.path.join(self.dirc, "Figure", "time VS load")
-        try:
-            os.makedirs(folder_path, exist_ok=True)
-        except:
-            pass
+        os.makedirs(folder_path, exist_ok=True)
         fig.savefig(os.path.join(folder_path, self.name + ".png"))
         plt.close(fig)
 
     def time_crosshead_graph(self):
+        """
+            To plot the time VS crosshead graph
+
+            **Parameters**
+                None
+
+            **Returns**
+                None
+        """
         x = self.time
         y = self.crosshead
         fig, ax = plt.subplots()
@@ -284,9 +471,23 @@ class Data:
         plt.close(fig)
 
     def double_comp(self):
+        """
+            Data processing for double compression
+
+            **Parameters**
+                None
+
+            **Returns**
+                plasticity: *float*
+                    The plasticity of sample
+                zero_1: *float*
+                    The first time load reaches 0
+                zero_2: *float*
+                    The second time load reaches 0
+        """
         zero_pos = []
         for i in range(len(self.load)):
-            if self.load[i-1] < 0 and self.load[i] >= 0:
+            if self.load[i - 1] < 0 and self.load[i] >= 0:
                 zero_pos.append(i)
         zero_time = [self.time[i] for i in zero_pos]
         zero_1 = self.time.index(min(zero_time))
@@ -296,15 +497,33 @@ class Data:
         return plasticity, zero_1, zero_2
 
     def single_comp(self):
+        """
+            Data processing for single compression, fitting for the young's modulus
+
+            **Parameters**
+                None
+
+            **Returns**
+                fit_start: *float*
+                    The start position of the fit
+                fit_end: *float*
+                    The end position of the fit
+                slope: *float*
+                    The young's modulus of the sample, or the slop for the fit
+                intercept: *float*
+                    The intercept for the fit
+                half_time: *float*
+                    The half_time for the sample
+        """
         half_time = []
         for i in range(len(self.load)):
             if self.load[i - 1] < 0 and self.load[i] >= 0:
                 start = i
                 break
         load_applied = max(self.load) - self.load[start]
-        thr = 0.1*load_applied
-        thr_2 = 0.3*load_applied
-        thr_3 = load_applied/2
+        thr = 0.1 * load_applied
+        thr_2 = 0.3 * load_applied
+        thr_3 = load_applied / 2
         for i in range(len(self.load)):
             if self.load[i - 1] < thr and self.load[i] >= thr:
                 fit_start = i
@@ -317,12 +536,33 @@ class Data:
         slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
         return fit_start, fit_end, slope, intercept, half_time
 
-def export_to_excel(self):
-    global  sc_df, dc_df
+
+def export_to_excel():
+    """
+        Export data into an Excel file
+
+        **Parameters**
+            None
+
+        **Returns**
+           None
+    """
+    global sc_df, dc_df
     with pd.ExcelWriter('output.xlsx', engine='openpyxl') as writer:
         sc_df.to_excel(writer, sheet_name='SC Data')
         dc_df.to_excel(writer, sheet_name='DC Data')
+
+
 def save_values():
+    """
+        Save the inputted values and call for the processing commands
+
+        **Parameters**
+            None
+
+        **Returns**
+            None
+    """
     global sc_df, dc_df
     test_id = 0
     total_n = 0
@@ -383,11 +623,6 @@ def save_values():
     contr.all_test_name = all_test_name
 
 
-
-
-
-
-
 root = tk.Tk()
 root.title("MTS Data Analyzer")
 root.state('zoomed')
@@ -413,7 +648,6 @@ button.pack()
 export_button = tk.Button(top_frame, text="Export to Excel", command=export_to_excel)
 export_button.pack()
 
-
 left_frame = tk.Frame(root)
 left_frame.place(x=0, y=200, width=800, height=600)
 
@@ -426,7 +660,4 @@ right_frame1.place(x=800, y=200, width=420, height=500)
 right_frame2 = tk.Frame(root)
 right_frame2.place(x=1220, y=200, width=280, height=500)
 
-
-
 root.mainloop()
-
