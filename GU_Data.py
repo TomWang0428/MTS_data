@@ -1,3 +1,12 @@
+"""
+    *MTS_data analyzer*
+    Date: Dec-09-2023
+    This program analyze data collected by the MTS machine and give out a GUI for easy control.
+    Contributors:
+        Mengke Wang
+"""
+
+
 import os
 import matplotlib.pyplot as plt
 from PIL import Image, ImageTk
