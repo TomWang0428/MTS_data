@@ -733,7 +733,10 @@ class Data:
                     The half_time for the sample
         """
         global redo_flag, left_entry, right_entry
-
+        start = 0
+        if self.load[0] > 0:
+            start_load = max(self.load[:10])
+            self.load = [value - start_load for value in self.load]
         half_time = []
         for i in range(len(self.load)):
             if self.load[i - 1] < 0 and self.load[i] >= 0 and i > self.load.index(min(self.load)):
@@ -913,7 +916,7 @@ label = tk.Label(top_frame, text="Enter dir:")
 label.pack()
 entry1 = tk.Entry(top_frame)
 entry1.pack()
-label = tk.Label(top_frame, text="Enter Area (m^2):")
+label = tk.Label(top_frame, text="Enter Area (mm^2):")
 label.pack()
 entry3 = tk.Entry(top_frame)
 entry3.pack()
