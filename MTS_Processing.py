@@ -6,12 +6,8 @@
         Mengke Wang
 """
 
-
 import os
 import time
-import matplotlib.pyplot as plt
-from scipy.signal import butter, lfilter
-from filterpy.kalman import KalmanFilter
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
@@ -21,8 +17,6 @@ from tkinter import ttk
 from scipy import stats
 import pandas as pd
 import matplotlib.pyplot as plt
-import math
-
 def read_file(folder_path):
     """
         read in the datas based on the folder path
@@ -919,7 +913,7 @@ label = tk.Label(top_frame, text="Enter dir:")
 label.pack()
 entry1 = tk.Entry(top_frame)
 entry1.pack()
-label = tk.Label(top_frame, text="Enter Area:")
+label = tk.Label(top_frame, text="Enter Area (m^2):")
 label.pack()
 entry3 = tk.Entry(top_frame)
 entry3.pack()
