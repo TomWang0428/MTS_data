@@ -597,7 +597,7 @@ class Data:
         if self.test_type == 'sc':
             thr = (max(self.load) - 0) / 2
             for i in range(len(self.load)):
-                if self.load[i-1] < thr and self.load[i] > thr and i > self.load.index(max(self.load)):
+                if self.load[i-1] > thr and self.load[i] < thr and i > self.load.index(max(self.load)):
                     hal_index = i
                     halftime = self.times[i] - self.times[self.load.index(max(self.load))]
                     ax.plot(x[hal_index], y[hal_index], 'ro', markersize=5)
